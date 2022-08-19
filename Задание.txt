@@ -1,0 +1,102 @@
+Создать двух пользователей (с помощью метода User.objects.create_user(‘username')).
+>>> User.objects.create_user('Ivan')
+<User: Ivan>
+>>> User.objects.create_user('Alena')
+<User: Alena>
+
+ Создать два объекта модели Author, связанные с пользователями.
+>>> Author.objects.create(name='Иван Иванов', user_id=1)
+<Author: Author object (1)>
+>>> Author.objects.create(name='Петрова Алена', user_id=2)
+<Author: Author object (2)>
+
+ Добавить 4 категории в модель Category.
+>>> Category.objects.create(name='Спорт')
+<Category: Category object (1)>
+>>> Category.objects.create(name='Политика')
+<Category: Category object (2)>
+>>> Category.objects.create(name='Образование')
+<Category: Category object (3)>
+>>> Category.objects.create(name='Искусство')
+<Category: Category object (4)>
+
+ Добавить 2 статьи и 1 новость.
+>>> Post.objects.create(author_id=1, category='post', name='Дзюба подписал однолетний контракт с турецким «Адана Демирспором», text=‘Российский нападающий Артем Дзюба заключил контракт с турецким футбольным клубом «Адана Демирспорт», сообщается в Twitter команды. Соглашение с 33-летним форвардом подписано на год. Спортсмен будет получать €1,5 млн в год.’)
+<Post: Post object (1)>
+
+>>> Post.objects.create(author_id=2, category='post', name='Китайский импорт прижимают к обочине', text='Импорт легковых машин из ЕС и Южной Кореи в Россию удваивается на фоне низкой базы
+ весенних месяцев. Так, из Европы в июне было поставлено автомобилей на €20,5 млн, из Кореи в июле — на $59,4 млн. По мере доставки этих машин в Россию доля китайских марок, достигшая 80% во втором квартале, снизится. При этом с учетом подержанных машин безоговорочно крупнейшим экспортером автомобилей в РФ остается Япония с объемом отгрузок в июне в $140 млн.')
+<Post: Post object (2)>
+>>> Post.objects.create(author_id=1, category='news', name='Известный дирижер сожалеет, что не записал книгу о Прокофьеве', text='Известный дирижер и пианист Юстус Франтц заявил РИА Новости, что сожалеет о своей ошибке, которую совершил, отказавшись записать книгу о русском композиторе Сергее Прокофьеве.')
+<Post: Post object (3)>
+
+
+ Присвоить им категории (как минимум в одной статье/новости должно быть не меньше 2 категорий).
+>>> PostCategory.objects.create(post_id=1, category_id=1)
+<PostCategory: PostCategory object (1)>
+>>> PostCategory.objects.create(post_id=1, category_id=2)
+<PostCategory: PostCategory object (2)>
+>>> PostCategory.objects.create(post_id=3, category_id=3)
+<PostCategory: PostCategory object (3)>
+>>> PostCategory.objects.create(post_id=3, category_id=4)
+<PostCategory: PostCategory object (4)>
+
+ Создать как минимум 4 комментария к разным объектам модели Post (в каждом объекте должен быть как минимум один комментарий).
+>>> Comment.objects.create(post_id=1, user_id=2, text = 'Дзюба молодец')
+<Comment: Comment object (1)>
+>>> Comment.objects.create(post_id=2, user_id=1, text = 'Китайцы нас покорят')
+<Comment: Comment object (2)>
+>>> Comment.objects.create(post_id=3, user_id=2, text = 'Великий композитор Прокофьев')
+<Comment: Comment object (3)>
+>>> Comment.objects.create(post_id=3, user_id=2, text = 'Узнаваема и специфическая ритмика Прокофьева, особенно ярко проявляющаяся в его фортепианных сочинениях')
+<Comment: Comment object (4)>
+
+ Применяя функции like() и dislike() к статьям/новостям и комментариям, скорректировать рейтинги этих объектов.
+>>> p1 = Post.objects.all()[0]
+>>> p1.like()
+>>> p1.like()
+>>> p2 = Post.objects.all()[2]
+>>> p2.like()
+>>> p2.like()
+>>> p2.like()
+>>> p3 = Post.objects.all()[1]
+>>> p3.like()
+>>> c1 = Comment.objects.all()[0]
+>>> c1.like()
+>>> c1.like()
+>>> c1.dislike()
+>>> c4 = Comment.objects.all()[3]
+>>> c4.dislike()
+>>> c4.dislike()
+>>> c4.dislike()
+>>> c4.dislike()
+>>> c4.dislike()
+ 
+ Обновить рейтинги пользователей.
+>>> a1 = Author.objects.all()[0]
+>>> a2 = Author.objects.all()[1]
+>>> a1.update_rating()
+11
+>>> a2.update_rating()
+-1
+
+ Вывести username и рейтинг лучшего пользователя (применяя сортировку и возвращая поля первого объекта)
+>>> Author.objects.all().order_by('-rating').values('name', 'rating')[0]
+{'name': 'Иван Иванов', 'rating': 11}
+
+ Вывести дату добавления, username автора, рейтинг, заголовок и превью лучшей статьи, основываясь на лайках/дислайках к этой статье.
+>>> Post.objects.all().order_by('-rating').values('time', 'author', 'rating', 'name')[0]
+{'time': datetime.datetime(2022, 8, 18, 19, 26, 28, 299985), 'author': 1, 'rating': 3, 'name': 'Известный дирижер сожалеет, что не записал книгу о Прокофьеве'}
+>>> a = Post.objects.all().order_by('-rating')[0]
+>>> a.preview()
+'Известный дирижер и пианист Юстус Франтц заявил РИА Новости, что сожалеет о своей ошибке, которую совершил, отказавшись запи…’ 
+
+ Вывести все комментарии (дата, пользователь, рейтинг, текст) к этой статье.
+>>> Post.objects.all().order_by('-rating').values('id')[0]
+{'id': 3}
+>>> Comment.objects.filter(post_id=3).values('time', 'user', 'rating', 'text')
+<QuerySet [{'time': datetime.datetime(2022, 8, 18, 19, 34, 49, 880652), 'user': 2, 'rating': 0, 'text': 'Великий композитор Прокофьев'}, {'time': datetime.datetime(2022, 8, 18, 19, 36, 11, 854725), 'user': 2, 'rating': -5, 'text': 'Узнаваема и специфическая ритмика Прокофьева, особенно ярко проявляющаяся в его фортепианных сочинениях'}]>
+
+
+
+
